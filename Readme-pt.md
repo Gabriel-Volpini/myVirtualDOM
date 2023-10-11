@@ -63,15 +63,15 @@ De acordo com a [documentação oficial do Babel JSX](https://babeljs.io/docs/ba
 
 ```jsx
 <ul className=”list”>  
-	<li>First</li>  
-	<li>Second</li>  
+  <li>First</li>  
+  <li>Second</li>  
 </ul>
 ```
 Para o seguinte:
 ```js
 React.createElement(‘ul’, { className: ‘list’ },  
-	React.createElement(‘li’, {}, ‘item 1’),  
-	React.createElement(‘li’, {}, ‘item 2’),  
+  React.createElement(‘li’, {}, ‘First’),  
+  React.createElement(‘li’, {}, ‘Second’),  
 );
 ```
 Funcina exatamente da mesma forma que a nossa implementação `h(...)`, porém usando o `React.createElement(...)`, para poder fazer o babel utilizar a nossa função no lugar da função do React, podemos utilizar o chamado *jsx pragma*. Basta adicionar um comentário no inicio do arquivo da seguinte forma:
@@ -99,19 +99,19 @@ const myTree = (
 E o resultado gerado pelo Babel será:
 ```js
 const myTree = (  
-	h(‘ul’, { className: ‘list’ },  
-		h(‘li’, {}, ‘First’),  
-		h(‘li’, {}, ‘Second’),  
-	);  
+  h(‘ul’, { className: ‘list’ },  
+    h(‘li’, {}, ‘First’),  
+    h(‘li’, {}, ‘Second’),  
+  );  
 );
 ```
 E quando a nossa função `h` for executada será retornando apenas `JS objects`, para a nossa representação da **virtual DOM**
 ```js
 const myTree = (  
-	{ type: ‘ul’, props: { className: ‘list’ }, children: [  
-		{ type: ‘li’, props: {}, children: [‘First’] },  
-		{ type: ‘li’, props: {}, children: [‘Second’] }  
-	] }  
+  { type: ‘ul’, props: { className: ‘list’ }, children: [  
+    { type: ‘li’, props: {}, children: [‘First’] },  
+    { type: ‘li’, props: {}, children: [‘Second’] }  
+  ] }  
 );
 ```
 
