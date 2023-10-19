@@ -9,7 +9,6 @@ A Virtual DOM é uma técnica fundamental usada em bibliotecas e frameworks Java
 - [Pré-requisitos](#pr%C3%A9-requisitos)
 - [Instalação](#instala%C3%A7%C3%A3o)
 - [Mão na massa](#mão-na-massa)
-  - [Representando a virtual DOM](#representando-a-virtual-dom)
 
 ## Visão Geral
 Neste projeto, você encontrará uma implementação básica de uma **Virtual DOM**. Esta implementação é uma forma simplificada do funcionamento dos conceitos por trás da Virtual **DOM** mas serve para pode entender melhor projetos mais complexos.
@@ -63,15 +62,15 @@ De acordo com a [documentação oficial do Babel JSX](https://babeljs.io/docs/ba
 
 ```jsx
 <ul className=”list”>  
-  <li>First</li>  
-  <li>Second</li>  
+	<li>First</li>  
+	<li>Second</li>  
 </ul>
 ```
 Para o seguinte:
 ```js
 React.createElement(‘ul’, { className: ‘list’ },  
-  React.createElement(‘li’, {}, ‘First’),  
-  React.createElement(‘li’, {}, ‘Second’),  
+	React.createElement(‘li’, {}, ‘item 1’),  
+	React.createElement(‘li’, {}, ‘item 2’),  
 );
 ```
 Funcina exatamente da mesma forma que a nossa implementação `h(...)`, porém usando o `React.createElement(...)`, para poder fazer o babel utilizar a nossa função no lugar da função do React, podemos utilizar o chamado *jsx pragma*. Basta adicionar um comentário no inicio do arquivo da seguinte forma:
@@ -99,19 +98,63 @@ const myTree = (
 E o resultado gerado pelo Babel será:
 ```js
 const myTree = (  
-  h(‘ul’, { className: ‘list’ },  
-    h(‘li’, {}, ‘First’),  
-    h(‘li’, {}, ‘Second’),  
-  );  
+	h(‘ul’, { className: ‘list’ },  
+		h(‘li’, {}, ‘First’),  
+		h(‘li’, {}, ‘Second’),  
+	);  
 );
 ```
 E quando a nossa função `h` for executada será retornando apenas `JS objects`, para a nossa representação da **virtual DOM**
 ```js
 const myTree = (  
-  { type: ‘ul’, props: { className: ‘list’ }, children: [  
-    { type: ‘li’, props: {}, children: [‘First’] },  
-    { type: ‘li’, props: {}, children: [‘Second’] }  
-  ] }  
+	{ type: ‘ul’, props: { className: ‘list’ }, children: [  
+		{ type: ‘li’, props: {}, children: [‘First’] },  
+		{ type: ‘li’, props: {}, children: [‘Second’] }  
+	] }  
 );
 ```
+Clique [aqui](https://github.com/Gabriel-Volpini/myVirtualDOM/blob/main/examples/1/index.js) para ver um arquivo de exemplo.
 
+### Aplicando nossa representação na DOM
+
+Com a representação da **árvore virtual** pronta, precisamos criar uma **árvore DOM** real que reflita a nossa **árvore virtual**, ja que não podemos simplesmente colocar a nossa no lugar da real.
+
+Para isso vamos definir algumas convenções e nomeclaturas:
+ - Todas as variáveis ​​contendo nodes da DOM real vão começar com `$` - Exemplo *$parent* 
+ - A representação da DOM virtual será chamada de *node*
+ - Assim como no *React* só poderemos ter um node raiz, e todos os outros serão filhos deste
+
+Com isso, vamos criar a nossa função *createElement(...)* que receberá um **node virtual** e retornará um **node real** .
+
+```js
+function createElement(node) {  
+	return document.createElement(node.type);  
+}
+```
+Como podemos receber tanto elementos normais quanto elementos de texto, precisamos fazer :a seguinte validação:
+```js
+function createElement(node) {  
+	if (typeof node === ‘string’) {  
+		return document.createTextNode(node);  
+	}  
+	return document.createElement(node.type);  
+}
+```
+Agor precisamos levar em consideração os elementos filhos, para cada um deles também precisaremos criar outros nodes com a nossa função *createElement(...)* , e podemos fazer isso de forma recursiva chamando o *appendChild()* para cada filho da seguinte forma:
+
+```js
+function createElement(node) {  
+	if (typeof node === ‘string’) {  
+		return document.createTextNode(node);  
+	}  
+	const $el = document.createElement(node.type);  
+	node.children  
+		.map(createElement)  
+		.forEach($el.appendChild.bind($el));  
+		
+	return $el;  
+}
+```
+Clique [aqui](https://github.com/Gabriel-Volpini/myVirtualDOM/blob/main/examples/2/index.js) para um arquivo de exemplo.
+
+###Lidando com mudanças
